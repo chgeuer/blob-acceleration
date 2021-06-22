@@ -60,41 +60,44 @@
             var gigs = (int) (blockListResponse.Value.BlobContentLength / giga);
             await Console.Out.WriteLineAsync($"Length {blockListResponse.Value.BlobContentLength} bytes, approx {gigs} GB");
 
+            static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;         
+
             int idx = 0;
             foreach (var blocks in blockListResponse.Value.CommittedBlocks.Blocks2().Chunk(batchSize: parallelDownloads))
             {
+                
+                Stopwatch stopWatch = new();
+                stopWatch.Start();
+
                 var tasks = blocks
                     .Select(async (blockAndRange, _i) =>
                     {
                         (BlobBlock blobBlock, Azure.HttpRange range) = blockAndRange;
 
-                        try
-                        {
-                            Stopwatch stopWatch = new ();
-                            stopWatch.Start();
+                        Stopwatch stopWatch = new ();
+                        stopWatch.Start();
 
-                            var response = await blobClient.DownloadStreamingAsync(blockAndRange.Item2);
-                            var stream = response.Value.Content;
-                            await stream.CopyToAsync(System.IO.Stream.Null);
+                        var response = await blobClient.DownloadStreamingAsync(blockAndRange.Item2);
+                        var stream = response.Value.Content;
+                        await stream.CopyToAsync(System.IO.Stream.Null);
 
-                            stopWatch.Stop();
-                 
-                            var ts = stopWatch.Elapsed;
+                        stopWatch.Stop();
+                        var ts = stopWatch.Elapsed;
 
-                            const double f = 8.0 / (1024 * 1024); 
 
-                            double megabitPerSecond = f * blobBlock.SizeLong / ts.TotalSeconds;
+                        // await Console.Out.WriteLineAsync($"Downloaded {range} {blobBlock.SizeLong} bytes ({MegabitPerSecond(blobBlock.SizeLong, ts):F2} Mbit/sec)");
 
-                            await Console.Out.WriteLineAsync($"Downloaded {range} {blobBlock.SizeLong} bytes ({megabitPerSecond:F2} Mbit/sec)");
-                        }
-                        catch (Exception e)
-                        {
-                            await Console.Error.WriteLineAsync($"Exception {e.Message} {range}");
-                        }
+                        return blobBlock.SizeLong;
                     })
                     .ToArray();
 
-                await Task.WhenAll(tasks);
+                var downloads = await Task.WhenAll(tasks);
+
+                stopWatch.Stop();
+                var ts = stopWatch.Elapsed;
+
+                await Console.Out.WriteLineAsync($"Downloaded {downloads.Sum()} bytes ({MegabitPerSecond(downloads.Sum(), ts):F2} Mbit/sec)");
+
 
                 idx++;
             }
