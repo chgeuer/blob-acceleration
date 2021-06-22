@@ -67,7 +67,6 @@
                     .Select(async (blockAndRange, _i) =>
                     {
                         (BlobBlock blobBlock, Azure.HttpRange range) = blockAndRange;
-                        await Console.Out.WriteLineAsync($"{idx} {blobBlock.Name}: {blobBlock}");
 
                         try
                         {
@@ -86,11 +85,11 @@
 
                             double megabitPerSecond = f * blobBlock.SizeLong / ts.TotalSeconds;
 
-                            await Console.Out.WriteLineAsync($"Downloaded {blobBlock.Name}: {blobBlock.SizeLong} bytes in {ts} ({megabitPerSecond:F2} Mbit/sec)");
+                            await Console.Out.WriteLineAsync($"Downloaded {range} {blobBlock.SizeLong} bytes ({megabitPerSecond:F2} Mbit/sec)");
                         }
                         catch (Exception e)
                         {
-                            await Console.Error.WriteLineAsync($"Exception {e.Message} {blockAndRange.Item2}");
+                            await Console.Error.WriteLineAsync($"Exception {e.Message} {range}");
                         }
                     })
                     .ToArray();
