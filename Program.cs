@@ -14,22 +14,28 @@
     {
         static async Task Main(string[] args)
         {
-            if (args.Length != 1) 
+
+            foreach (var parallelDownloads in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 }) 
             {
-                Console.Error.WriteLine("Please indicate number of concurrent downloads");
-                return;
+                await Bench(parallelDownloads);
             }
-            int parallelDownloads = int.Parse(args[0]);
+        }
+
+        static async Task Bench(int parallelDownloads)
+        {
             await Console.Out.WriteLineAsync($"Running {parallelDownloads} downloads in parallel");
 
             var (accountName, containerName) = ("chgeuerperf", "container1");
             var blobName = "1gb.randombin";
 
+            Stopwatch outerStopWatch = new();
+            outerStopWatch.Start();
+
             var cred = new DefaultAzureCredential(includeInteractiveCredentials: true);
             BlobContainerClient containerClient = new(new Uri($"https://{accountName}.blob.core.windows.net/{containerName}"), cred);
             const long giga = (1 << 30);
 
-            var blobClient =  new BlockBlobClient(blobUri: new Uri($"https://{accountName}.blob.core.windows.net/{containerName}/{blobName}"), credential: cred);
+            var blobClient = new BlockBlobClient(blobUri: new Uri($"https://{accountName}.blob.core.windows.net/{containerName}/{blobName}"), credential: cred);
             //var props = await blobClient.GetPropertiesAsync();
 
 
@@ -57,15 +63,15 @@
             //    .ToArray();
 
             var blockListResponse = await blobClient.GetBlockListAsync();
-            var gigs = (int) (blockListResponse.Value.BlobContentLength / giga);
+            var gigs = (int)(blockListResponse.Value.BlobContentLength / giga);
             await Console.Out.WriteLineAsync($"Length {blockListResponse.Value.BlobContentLength} bytes, approx {gigs} GB");
 
-            static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;         
+            static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;
 
             int idx = 0;
             foreach (var blocks in blockListResponse.Value.CommittedBlocks.Blocks2().Chunk(batchSize: parallelDownloads))
             {
-                
+
                 Stopwatch stopWatch = new();
                 stopWatch.Start();
 
@@ -74,16 +80,15 @@
                     {
                         (BlobBlock blobBlock, Azure.HttpRange range) = blockAndRange;
 
-                        Stopwatch stopWatch = new ();
-                        stopWatch.Start();
+                        Stopwatch innerStopWatch = new();
+                        innerStopWatch.Start();
 
                         var response = await blobClient.DownloadStreamingAsync(blockAndRange.Item2);
                         var stream = response.Value.Content;
                         await stream.CopyToAsync(System.IO.Stream.Null);
 
-                        stopWatch.Stop();
-                        var ts = stopWatch.Elapsed;
-
+                        innerStopWatch.Stop();
+                        var ts = innerStopWatch.Elapsed;
 
                         // await Console.Out.WriteLineAsync($"Downloaded {range} {blobBlock.SizeLong} bytes ({MegabitPerSecond(blobBlock.SizeLong, ts):F2} Mbit/sec)");
 
@@ -101,6 +106,13 @@
 
                 idx++;
             }
+
+            outerStopWatch.Stop();
+            var outerTime = outerStopWatch.Elapsed;
+
+            await Console.Out.WriteLineAsync($"Overall time with {parallelDownloads} {outerTime.TotalSeconds} seconds ({MegabitPerSecond(blockListResponse.Value.BlobContentLength, outerTime):F2} Mbit/sec)");
+
+            await Console.Out.WriteLineAsync($"-----------------------------------");
         }
     }
 
