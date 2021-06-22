@@ -101,8 +101,7 @@
                 stopWatch.Stop();
                 var ts = stopWatch.Elapsed;
 
-                await Console.Out.WriteLineAsync($"Downloaded {downloads.Sum()} bytes ({MegabitPerSecond(downloads.Sum(), ts):F2} Mbit/sec)");
-
+                await Console.Out.WriteLineAsync($"In {parallelDownloads} downloads, fetch {downloads.Sum()} bytes ({MegabitPerSecond(downloads.Sum(), ts):F2} Mbit/sec)");
 
                 idx++;
             }
