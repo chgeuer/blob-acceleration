@@ -14,6 +14,14 @@
     {
         static async Task Main(string[] args)
         {
+            if (args.Length != 1) 
+            {
+                Console.Error.WriteLine("Please indicate number of concurrent downloads");
+                return;
+            }
+            int parallelDownloads = int.Parse(args[0]);
+            await Console.Out.WriteLineAsync($"Running {parallelDownloads} downloads in parallel");
+
             var (accountName, containerName) = ("chgeuerperf", "container1");
             var blobName = "1gb.randombin";
 
@@ -53,7 +61,7 @@
             await Console.Out.WriteLineAsync($"Length {blockListResponse.Value.BlobContentLength} bytes, approx {gigs} GB");
 
             int idx = 0;
-            foreach (var blocks in blockListResponse.Value.CommittedBlocks.Blocks2().Chunk(batchSize: 5))
+            foreach (var blocks in blockListResponse.Value.CommittedBlocks.Blocks2().Chunk(batchSize: parallelDownloads))
             {
                 var tasks = blocks
                     .Select(async (blockAndRange, _i) =>
