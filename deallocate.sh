@@ -6,7 +6,7 @@ msiVersion="2018-02-01"
 
 access_token="$(curl --silent --get \
     --url "http://169.254.169.254/metadata/identity/oauth2/token" \
-    --data-urlencode "api-version=${imdsVersion}" \
+    --data-urlencode "api-version=${msiVersion}" \
     --data-urlencode "resource=${resource}" \
     --header "Metadata: true" \
     | jq -r ".access_token")"
