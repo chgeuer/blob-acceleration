@@ -1,0 +1,517 @@
+{
+  "compute": {
+    "azEnvironment": "AzurePublicCloud",
+    "customData": "",
+    "evictionPolicy": "",
+    "isHostCompatibilityLayerVm": "false",
+    "licenseType": "",
+    "location": "westeurope",
+    "name": "chgeuerperf",
+    "offer": "0001-com-ubuntu-server-focal",
+    "osProfile": {
+      "adminUsername": "chgeuer",
+      "computerName": "chgeuerperf",
+      "disablePasswordAuthentication": "true"
+    },
+    "osType": "Linux",
+    "placementGroupId": "",
+    "plan": {
+      "name": "",
+      "product": "",
+      "publisher": ""
+    },
+    "platformFaultDomain": "0",
+    "platformUpdateDomain": "0",
+    "priority": "",
+    "provider": "Microsoft.Compute",
+    "publicKeys": [
+      {
+        "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChtYrLu/UY916owGYw5h7z+HVl452M+/GlLF3WQC0ONq9P+JBCoGgXfyI7bF+DMsx6Lx1WxMdEEnrPGQHIsYjRceYz3j8iS29PHV04tVDpfsS2H3ZH5S4n++CyvteIEbhvss5jeBnvqCgK+s3beJLEUhGR+63z57Lmk3nX3mw+Pe1xkTRTsU3aJxzlRi/h/pnne1/GP4eXP8rXpyFHLsaGUrLI2LRgvXVnzAWqB+JZcdsQKLY6pB9Scy1k3jMO28QHwhBWU1p4ZzU6X8/AIbGSi5VGAEw31VeaCa01MkZRysgEE+BLYiin0PEgMwU+6Oiq9hbvVnRJhp52MvstTHQv chgeuer@beam",
+        "path": "/home/chgeuer/.ssh/authorized_keys"
+      }
+    ],
+    "publisher": "canonical",
+    "resourceGroupName": "perf",
+    "resourceId": "/subscriptions/724467b5-bee4-484b-bf13-d6a5505d2b51/resourceGroups/perf/providers/Microsoft.Compute/virtualMachines/chgeuerperf",
+    "securityProfile": {
+      "secureBootEnabled": "false",
+      "virtualTpmEnabled": "false"
+    },
+    "sku": "20_04-lts",
+    "storageProfile": {
+      "dataDisks": [],
+      "imageReference": {
+        "id": "",
+        "offer": "0001-com-ubuntu-server-focal",
+        "publisher": "canonical",
+        "sku": "20_04-lts",
+        "version": "latest"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "diffDiskSettings": {
+          "option": ""
+        },
+        "diskSizeGB": "30",
+        "encryptionSettings": {
+          "enabled": "false"
+        },
+        "image": {
+          "uri": ""
+        },
+        "managedDisk": {
+          "id": "/subscriptions/724467b5-bee4-484b-bf13-d6a5505d2b51/resourceGroups/PERF/providers/Microsoft.Compute/disks/chgeuerperf_OsDisk_1_e4c427197a194dafaec4d60151596fa3",
+          "storageAccountType": "Premium_LRS"
+        },
+        "name": "chgeuerperf_OsDisk_1_e4c427197a194dafaec4d60151596fa3",
+        "osType": "Linux",
+        "vhd": {
+          "uri": ""
+        },
+        "writeAcceleratorEnabled": "false"
+      },
+      "resourceDisk": {
+        "size": "32768"
+      }
+    },
+    "subscriptionId": "724467b5-bee4-484b-bf13-d6a5505d2b51",
+    "tags": "",
+    "tagsList": [],
+    "userData": "",
+    "version": "20.04.202106140",
+    "vmId": "86132153-3cb1-418a-bf43-1937673e2881",
+    "vmScaleSetName": "",
+    "vmSize": "Standard_F4s_v2",
+    "zone": "1"
+  },
+  "network": {
+    "interface": [
+      {
+        "ipv4": {
+          "ipAddress": [
+            {
+              "privateIpAddress": "10.1.0.5",
+              "publicIpAddress": ""
+            }
+          ],
+          "subnet": [
+            {
+              "address": "10.1.0.0",
+              "prefix": "24"
+            }
+          ]
+        },
+        "ipv6": {
+          "ipAddress": []
+        },
+        "macAddress": "000D3A22C4FA"
+      }
+    ]
+  }
+}
+Running 1 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 1 downloads, fetch 1073741824 bytes (1089.07 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1119.52 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1108.66 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1123.01 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1104.72 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1122.15 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1083.56 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1106.64 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1125.84 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1123.48 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1107.96 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1121.16 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1115.00 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1113.65 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1045.54 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1124.99 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1113.91 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1124.91 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1090.53 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1117.39 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1108.44 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1120.67 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1133.25 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1116.65 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1111.72 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1120.44 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1122.24 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1127.58 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1128.88 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1132.60 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1129.51 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1126.76 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1114.48 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1124.90 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1124.43 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1120.47 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1125.38 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1139.93 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1122.45 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1118.13 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1129.31 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (971.97 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (943.38 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (948.22 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (937.85 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (964.48 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (943.55 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (933.15 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (924.55 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (940.37 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (939.75 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (937.96 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (949.59 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (950.57 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (950.77 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (951.83 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (941.88 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (866.22 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (941.76 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (934.11 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (939.43 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (948.23 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (940.49 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (930.24 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (930.79 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (932.91 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (937.04 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (944.28 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (946.12 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (943.43 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (942.48 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (944.72 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (930.31 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (938.09 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (943.02 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (934.10 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (973.65 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1002.79 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1008.74 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1001.96 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1015.04 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1007.15 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1017.75 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1004.48 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1003.47 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1009.37 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (994.35 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (990.71 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1002.15 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (994.69 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (998.96 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1010.53 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1006.53 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1000.86 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (953.57 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1003.89 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1007.47 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1016.24 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (994.72 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1002.83 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1013.40 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1022.79 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (998.22 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1009.94 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1007.07 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1003.43 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1012.53 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1002.29 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (999.99 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1001.12 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1006.55 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (989.87 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (1006.43 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (828.50 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (921.17 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (916.31 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (904.56 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (926.13 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (926.95 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (928.18 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (923.63 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (914.69 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (920.27 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (929.02 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (922.96 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (907.03 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (923.28 Mbit/sec)
+In 1 downloads, fetch 1073741824 bytes (918.55 Mbit/sec)
+Overall time with 1 1043.7671746 seconds (1004.61 Mbit/sec)
+-----------------------------------
+Running 2 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 2 downloads, fetch 2147483648 bytes (1886.66 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1885.86 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1911.86 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1896.04 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1903.74 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1893.84 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1892.61 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1911.83 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1913.80 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1905.61 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1893.20 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1889.90 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1879.68 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1870.29 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1882.19 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1858.46 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1877.57 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1893.92 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1848.75 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1869.35 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2012.10 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2065.84 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2006.91 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2064.11 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2073.20 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2035.78 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2027.41 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2015.19 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1995.62 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1972.69 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1944.72 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1999.51 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2058.22 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2062.97 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2018.13 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (2064.83 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1770.77 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1970.47 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1966.53 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1982.82 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1900.45 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1964.29 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1944.18 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1974.21 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1880.10 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1965.81 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1955.82 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1931.87 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1949.12 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1969.35 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1961.09 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1955.70 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1990.36 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1961.42 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1937.55 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1913.31 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1936.28 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1873.78 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1902.19 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1858.25 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1865.03 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1888.44 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1845.53 Mbit/sec)
+In 2 downloads, fetch 2147483648 bytes (1867.60 Mbit/sec)
+Overall time with 2 541.6236237 seconds (1935.99 Mbit/sec)
+-----------------------------------
+Running 3 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 3 downloads, fetch 3221225472 bytes (2494.58 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2520.77 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2502.10 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2488.22 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2453.20 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2529.62 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2487.43 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2439.75 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2480.39 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2407.26 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2490.99 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2428.83 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2432.85 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2518.30 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2466.69 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2498.06 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2469.64 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2557.30 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2466.95 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2520.68 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2526.33 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2561.81 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2526.05 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2538.07 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2562.88 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2740.56 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2753.53 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2746.35 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2773.86 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2665.30 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2787.41 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2730.71 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2712.25 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2725.59 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2763.89 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2761.98 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2762.96 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2754.95 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (2728.05 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (3082.44 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (3051.84 Mbit/sec)
+In 3 downloads, fetch 3221225472 bytes (3088.72 Mbit/sec)
+In 3 downloads, fetch 2147483648 bytes (2106.17 Mbit/sec)
+Overall time with 3 403.5780086 seconds (2598.20 Mbit/sec)
+-----------------------------------
+Running 4 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 4 downloads, fetch 4294967296 bytes (3655.48 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3923.59 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3929.13 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3954.01 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (4007.71 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3887.03 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3952.55 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3933.92 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3980.75 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3941.90 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3914.07 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3975.16 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3936.31 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3939.64 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3920.47 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3946.01 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3909.85 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3981.01 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3394.24 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3326.74 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3324.95 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3417.56 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3269.84 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3218.13 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3279.10 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3365.92 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3370.93 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3256.45 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3351.16 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3242.95 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3561.38 Mbit/sec)
+In 4 downloads, fetch 4294967296 bytes (3593.11 Mbit/sec)
+Overall time with 4 287.1936446 seconds (3651.11 Mbit/sec)
+-----------------------------------
+Running 5 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 5 downloads, fetch 5368709120 bytes (3948.38 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (4048.33 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3794.28 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3890.94 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3787.31 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3894.60 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3860.82 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3954.85 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3903.98 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3929.41 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (4063.20 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3895.72 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3960.01 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3984.25 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3942.66 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (4031.33 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3255.48 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3503.22 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3499.28 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3565.24 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3553.07 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3861.19 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3824.02 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (4018.92 Mbit/sec)
+In 5 downloads, fetch 5368709120 bytes (3832.18 Mbit/sec)
+In 5 downloads, fetch 3221225472 bytes (2667.26 Mbit/sec)
+Overall time with 5 277.2314033 seconds (3782.31 Mbit/sec)
+-----------------------------------
+Running 8 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 8 downloads, fetch 8589934592 bytes (4758.48 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4592.52 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4310.07 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4468.81 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4153.60 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4059.32 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (3892.46 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4096.78 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4175.98 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4008.35 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (3855.01 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4095.45 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4025.70 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (4057.86 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (3967.16 Mbit/sec)
+In 8 downloads, fetch 8589934592 bytes (3953.00 Mbit/sec)
+Overall time with 8 253.2715639 seconds (4140.13 Mbit/sec)
+-----------------------------------
+Running 12 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 12 downloads, fetch 12884901888 bytes (4595.06 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (4742.80 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (4586.61 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (4945.54 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (5663.47 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (5379.66 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (5427.77 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (4736.29 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (4902.16 Mbit/sec)
+In 12 downloads, fetch 12884901888 bytes (4898.62 Mbit/sec)
+In 12 downloads, fetch 8589934592 bytes (3935.15 Mbit/sec)
+Overall time with 12 214.7270209 seconds (4883.30 Mbit/sec)
+-----------------------------------
+Running 16 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 16 downloads, fetch 17179869184 bytes (5228.97 Mbit/sec)
+In 16 downloads, fetch 17179869184 bytes (5513.73 Mbit/sec)
+In 16 downloads, fetch 17179869184 bytes (5682.22 Mbit/sec)
+In 16 downloads, fetch 17179869184 bytes (5449.18 Mbit/sec)
+In 16 downloads, fetch 17179869184 bytes (5586.20 Mbit/sec)
+In 16 downloads, fetch 17179869184 bytes (5751.21 Mbit/sec)
+In 16 downloads, fetch 17179869184 bytes (5868.25 Mbit/sec)
+In 16 downloads, fetch 17179869184 bytes (5536.54 Mbit/sec)
+Overall time with 16 188.2982091 seconds (5568.70 Mbit/sec)
+-----------------------------------
+Running 20 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 20 downloads, fetch 21474836480 bytes (5690.09 Mbit/sec)
+In 20 downloads, fetch 21474836480 bytes (5710.49 Mbit/sec)
+In 20 downloads, fetch 21474836480 bytes (5624.07 Mbit/sec)
+In 20 downloads, fetch 21474836480 bytes (5670.68 Mbit/sec)
+In 20 downloads, fetch 21474836480 bytes (5668.42 Mbit/sec)
+In 20 downloads, fetch 21474836480 bytes (5743.54 Mbit/sec)
+In 20 downloads, fetch 8589934592 bytes (4939.00 Mbit/sec)
+Overall time with 20 186.2408015 seconds (5630.22 Mbit/sec)
+-----------------------------------
+Running 25 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 25 downloads, fetch 26843545600 bytes (5818.04 Mbit/sec)
+In 25 downloads, fetch 26843545600 bytes (5905.09 Mbit/sec)
+In 25 downloads, fetch 26843545600 bytes (5988.52 Mbit/sec)
+In 25 downloads, fetch 26843545600 bytes (5728.55 Mbit/sec)
+In 25 downloads, fetch 26843545600 bytes (5860.50 Mbit/sec)
+In 25 downloads, fetch 3221225472 bytes (2576.98 Mbit/sec)
+Overall time with 25 184.3430436 seconds (5688.18 Mbit/sec)
+-----------------------------------
+Running 30 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 30 downloads, fetch 32212254720 bytes (5911.40 Mbit/sec)
+In 30 downloads, fetch 32212254720 bytes (5761.67 Mbit/sec)
+In 30 downloads, fetch 32212254720 bytes (6092.54 Mbit/sec)
+In 30 downloads, fetch 32212254720 bytes (5991.17 Mbit/sec)
+In 30 downloads, fetch 8589934592 bytes (5312.38 Mbit/sec)
+Overall time with 30 177.94948 seconds (5892.55 Mbit/sec)
+-----------------------------------
+Running 40 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 40 downloads, fetch 42949672960 bytes (5996.82 Mbit/sec)
+In 40 downloads, fetch 42949672960 bytes (5837.68 Mbit/sec)
+In 40 downloads, fetch 42949672960 bytes (6020.43 Mbit/sec)
+In 40 downloads, fetch 8589934592 bytes (4354.65 Mbit/sec)
+Overall time with 40 180.3744901 seconds (5813.33 Mbit/sec)
+-----------------------------------
+Running 50 downloads in parallel
+Length 137438953472 bytes, approx 128 GB
+In 50 downloads, fetch 53687091200 bytes (6075.95 Mbit/sec)
+In 50 downloads, fetch 53687091200 bytes (5999.79 Mbit/sec)
+In 50 downloads, fetch 30064771072 bytes (5827.20 Mbit/sec)
+Overall time with 50 175.0679479 seconds (5989.54 Mbit/sec)
+-----------------------------------
