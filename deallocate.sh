@@ -14,7 +14,6 @@ vmId="$(curl --silent --get \
     | jq -r ".compute.resourceId" )"
 
 curl --silent --request POST \
-  --url "https://management.azure.com/${vmId}/deallocate" \
-  --data-urlencode "api-version=2021-03-01" \
+  --url "https://management.azure.com/${vmId}/deallocate?api-version=2021-03-01" \
   --header "Authorization: Bearer ${access_token}" \
   --data ""
