@@ -1,42 +1,20 @@
 #!/bin/bash
 
-resource="https://management.azure.com/"
-
-msiVersion="2018-02-01"
-
 access_token="$(curl --silent --get \
     --url "http://169.254.169.254/metadata/identity/oauth2/token" \
-    --data-urlencode "api-version=${msiVersion}" \
-    --data-urlencode "resource=${resource}" \
+    --data-urlencode "api-version=2018-02-01" \
+    --data-urlencode "resource=https://management.azure.com/" \
     --header "Metadata: true" \
     | jq -r ".access_token")"
 
-imdsVersion="2021-02-01"
-
-subscriptionId="$(curl --silent --get \
+vmId="$(curl --silent --get \
     --url "http://169.254.169.254/metadata/instance" \
-    --data-urlencode "api-version=${imdsVersion}" \
+    --data-urlencode "api-version=2021-02-01" \
     --header "Metadata: true" \
-    | jq -r ".compute.subscriptionId" )"
+    | jq -r ".compute.resourceId" )"
 
-resourceGroup="$(curl --silent --get \
-    --url "http://169.254.169.254/metadata/instance" \
-    --data-urlencode "api-version=${imdsVersion}" \
-    --header "Metadata: true" \
-    | jq -r ".compute.resourceGroupName" )"
-
-vmName="$(curl --silent --get \
-    --url "http://169.254.169.254/metadata/instance" \
-    --data-urlencode "api-version=${imdsVersion}" \
-    --header "Metadata: true" \
-    | jq -r ".compute.name" )"
-
-virtualMachineARMVersion="2021-03-01"
-
-#
-# Properly deallocate
-#
 curl --silent --request POST \
+  --url "https://management.azure.com/${vmId}/deallocate" \
+  --data-urlencode "api-version=2021-03-01" \
   --header "Authorization: Bearer ${access_token}" \
-  --url "https://management.azure.com/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup}/providers/Microsoft.Compute/virtualMachines/${vmName}/deallocate?api-version=${virtualMachineARMVersion}" \
   --data ""
