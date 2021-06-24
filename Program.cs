@@ -5,6 +5,7 @@ namespace ParallelDownload
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Dynamic;
     using System.IO;
     using System.Linq;
     using System.Net.Http;
@@ -31,9 +32,9 @@ namespace ParallelDownload
             var response = await new HttpClient().SendAsync(request);
             // var responseStr = await response.Content.ReadAsStringAsync();
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            var s = await JsonSerializer.DeserializeAsync<dynamic>(responseStream);
+            dynamic s = await JsonSerializer.DeserializeAsync<ExpandoObject>(responseStream);
 
-            await Console.Out.WriteLineAsync(s.ToString());
+            await Console.Out.WriteLineAsync(s["compute"]);
 
             // await DemoInterleaving();
             await BenchNumbers();
