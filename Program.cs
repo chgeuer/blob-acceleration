@@ -27,18 +27,10 @@ namespace ParallelDownload
     {
         static async Task Main(string[] _args)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
-            request.Headers.Add("Metadata", "true");
 
-            var response = await new HttpClient().SendAsync(request);
-            // var responseStr = await response.Content.ReadAsStringAsync();
-            var responseStream = await response.Content.ReadAsStringAsync();
-            dynamic s = JsonConvert.DeserializeObject<dynamic>(responseStream);
 
-            var location = (string)s.compute.location;
-
+            await BenchNumbers();
             // await DemoInterleaving();
-            await BenchNumbers(location);
         }
 
         static async Task DemoInterleaving()
@@ -108,8 +100,19 @@ namespace ParallelDownload
             await Task.Delay(0);
         }
 
-        static async Task BenchNumbers(string location)
+        static async Task BenchNumbers()
         {
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
+            request.Headers.Add("Metadata", "true");
+
+            var response = await new HttpClient().SendAsync(request);
+            // var responseStr = await response.Content.ReadAsStringAsync();
+            var responseStream = await response.Content.ReadAsStringAsync();
+            await Console.Out.WriteLineAsync(responseStream);
+
+            dynamic s = JsonConvert.DeserializeObject<dynamic>(responseStream);
+            var location = (string)s.compute.location;
+
             foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
             {
                 await Bench(i, location);
