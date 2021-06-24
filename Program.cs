@@ -5,14 +5,14 @@ namespace ParallelDownload
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Dynamic;
+
     using System.IO;
     using System.Linq;
     using System.Net.Http;
     using System.Reactive.Concurrency;
     using System.Reactive.Disposables;
     using System.Reactive.Linq;
-    using System.Text.Json;
+
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -21,7 +21,8 @@ namespace ParallelDownload
     // using Azure.Storage.Blobs; // https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/storage/Azure.Storage.Blobs/src
     using Azure.Storage.Blobs.Models;
     using Azure.Storage.Blobs.Specialized;
-    
+    using Newtonsoft.Json;
+
     class Program
     {
         static async Task Main(string[] _args)
@@ -31,10 +32,10 @@ namespace ParallelDownload
 
             var response = await new HttpClient().SendAsync(request);
             // var responseStr = await response.Content.ReadAsStringAsync();
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            dynamic s = await JsonSerializer.DeserializeAsync<ExpandoObject>(responseStream);
+            var responseStream = await response.Content.ReadAsStringAsync();
+            dynamic s = JsonConvert.DeserializeObject<dynamic>(responseStream);
 
-            await Console.Out.WriteLineAsync((string)s.compute["location"]);
+            await Console.Out.WriteLineAsync((string)s.compute.location);
 
             // await DemoInterleaving();
             await BenchNumbers();
