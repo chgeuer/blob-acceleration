@@ -33,7 +33,7 @@ namespace ParallelDownload
             using var responseStream = await response.Content.ReadAsStreamAsync();
             var s = await JsonSerializer.DeserializeAsync<dynamic>(responseStream);
 
-            await Console.Out.WriteLineAsync(s["compute"]["location"]);
+            await Console.Out.WriteLineAsync(s);
 
             // await DemoInterleaving();
             await BenchNumbers();
