@@ -35,10 +35,10 @@ namespace ParallelDownload
             var responseStream = await response.Content.ReadAsStringAsync();
             dynamic s = JsonConvert.DeserializeObject<dynamic>(responseStream);
 
-            await Console.Out.WriteLineAsync((string)s.compute.location);
+            var location = (string)s.compute.location;
 
             // await DemoInterleaving();
-            await BenchNumbers();
+            await BenchNumbers(location);
         }
 
         static async Task DemoInterleaving()
@@ -108,17 +108,23 @@ namespace ParallelDownload
             await Task.Delay(0);
         }
 
-        static async Task BenchNumbers()
+        static async Task BenchNumbers(string location)
         {
             foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
             {
-                await Bench(i);
+                await Bench(i, location);
             }
         }
 
-       static async Task Bench(int parallelDownloads)
+       static async Task Bench(int parallelDownloads, string location)
         {
-            var (accountName, containerName, blobName) = ("chgeuerperf", "container1", "1gb.randombin");
+            var accountName = location switch
+            {
+                "westeurope" => "chgeuerperf",
+                "northeurope" => "chgeuerperfne",
+                _ => throw new NotSupportedException("Unsupported location"),
+            };
+            var (containerName, blobName) = ("container1", "1gb.randombin");
 
             const long giga = (1 << 30);
             static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;
