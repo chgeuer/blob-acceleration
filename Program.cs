@@ -108,10 +108,15 @@ namespace ParallelDownload
             var response = await new HttpClient().SendAsync(request);
             // var responseStr = await response.Content.ReadAsStringAsync();
             var responseStream = await response.Content.ReadAsStringAsync();
-            await Console.Out.WriteLineAsync(responseStream);
+            // await Console.Out.WriteLineAsync(responseStream);
 
             dynamic s = JsonConvert.DeserializeObject<dynamic>(responseStream);
             var location = (string)s.compute.location;
+
+            await Console.Out.WriteLineAsync($".compute.vmSize     = {s.compute.vmSize}");
+            await Console.Out.WriteLineAsync($".compute.location   = {s.compute.location}");
+            await Console.Out.WriteLineAsync($".compute.zone       = {s.compute.zone}");
+            await Console.Out.WriteLineAsync($".compute.resourceId = {s.compute.resourceId}");
 
             foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
             {
