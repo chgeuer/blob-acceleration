@@ -74,7 +74,7 @@ namespace ParallelDownload
             bytesReadStream.Subscribe(
                 byteCount =>
                 {
-                    Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.",byteCount);
+                    Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.", byteCount);
                 });
 
             IObservable<byte[]> x = Observable.Using(
@@ -100,31 +100,34 @@ namespace ParallelDownload
             await Task.Delay(0);
         }
 
+        static async Task<dynamic> GetIMDS()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                requestUri: "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
+            request.Headers.Add("Metadata", "true");
+            var response = await new HttpClient().SendAsync(request);
+            var responseString = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<dynamic>(responseString);
+        }
+
         static async Task BenchNumbers()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
-            request.Headers.Add("Metadata", "true");
-
-            var response = await new HttpClient().SendAsync(request);
-            // var responseStr = await response.Content.ReadAsStringAsync();
-            var responseStream = await response.Content.ReadAsStringAsync();
-            // await Console.Out.WriteLineAsync(responseStream);
-
-            dynamic s = JsonConvert.DeserializeObject<dynamic>(responseStream);
-            var location = (string)s.compute.location;
-
+            dynamic s = await GetIMDS();
+            await Console.Out.WriteLineAsync($"--------------------------------------------------------------");
             await Console.Out.WriteLineAsync($".compute.vmSize     = {s.compute.vmSize}");
             await Console.Out.WriteLineAsync($".compute.location   = {s.compute.location}");
             await Console.Out.WriteLineAsync($".compute.zone       = {s.compute.zone}");
             await Console.Out.WriteLineAsync($".compute.resourceId = {s.compute.resourceId}");
+            await Console.Out.WriteLineAsync($"--------------------------------------------------------------");
 
+            var location = (string)s.compute.location;
             foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
             {
                 await Bench(i, location);
             }
         }
 
-       static async Task Bench(int parallelDownloads, string location)
+        static async Task Bench(int parallelDownloads, string location)
         {
             var accountName = location switch
             {
@@ -138,7 +141,7 @@ namespace ParallelDownload
             static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;
 
             var blobClient = new BlockBlobClient(
-                blobUri: new Uri($"https://{accountName}.blob.core.windows.net/{containerName}/{blobName}"), 
+                blobUri: new Uri($"https://{accountName}.blob.core.windows.net/{containerName}/{blobName}"),
                 credential: new DefaultAzureCredential(includeInteractiveCredentials: true));
 
             //var props = await blobClient.GetPropertiesAsync();
@@ -171,7 +174,7 @@ namespace ParallelDownload
             var blockListResponse = await blobClient.GetBlockListAsync();
             var gigs = (int)(blockListResponse.Value.BlobContentLength / giga);
             await Console.Out.WriteLineAsync($"Length {blockListResponse.Value.BlobContentLength} bytes, approx {gigs} GB");
-            
+
             foreach (var blocks in blockListResponse.Value.CommittedBlocks.GetBlocks().Chunk(batchSize: parallelDownloads))
             {
                 Stopwatch stopWatch = new();
@@ -214,14 +217,14 @@ namespace ParallelDownload
         }
     }
 
-    internal static class Utilities 
+    internal static class Utilities
     {
 
         private static IEnumerable<U> RollingAggregate<T, U, V>(
-            this IEnumerable<T> ts, 
-            V start, 
-            Func<T, V, V> aggregate, 
-            Func<T, V, U> map) 
+            this IEnumerable<T> ts,
+            V start,
+            Func<T, V, V> aggregate,
+            Func<T, V, U> map)
         {
             V agg = start;
             foreach (T t in ts)
@@ -233,8 +236,8 @@ namespace ParallelDownload
 
         internal static IEnumerable<(BlobBlock, HttpRange)> GetBlocks(this IEnumerable<BlobBlock> collection)
             => collection.RollingAggregate(
-                start: 0L, 
-                aggregate: (bb,offset) => offset + bb.SizeLong, 
+                start: 0L,
+                aggregate: (bb, offset) => offset + bb.SizeLong,
                 map: (bb, offset) => (bb, new HttpRange(offset: offset, length: bb.SizeLong)));
 
         internal static IEnumerable<(BlobBlock, HttpRange)> Blocks(this IEnumerable<BlobBlock> collection)
