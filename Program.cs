@@ -1,30 +1,117 @@
-﻿namespace ParallelDownload
+﻿using System;
+
+namespace ParallelDownload
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
+    using System.Net.Http;
+    using System.Reactive.Concurrency;
+    using System.Reactive.Disposables;
+    using System.Reactive.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
+    using Azure;
     using Azure.Identity;
     // using Azure.Storage.Blobs; // https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/storage/Azure.Storage.Blobs/src
     using Azure.Storage.Blobs.Models;
     using Azure.Storage.Blobs.Specialized;
-
+    
     class Program
     {
         static async Task Main(string[] _args)
         {
-            foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 }) 
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
+            request.Headers.Add("Metadata", "true");
+            var response = await new HttpClient().SendAsync(request);
+            var responseStr = await response.Content.ReadAsStringAsync();
+            await Console.Out.WriteLineAsync(responseStr);
+
+            // await DemoInterleaving();
+            await BenchNumbers();
+        }
+
+        static async Task DemoInterleaving()
+        {
+            MemoryStream ms = new();
+            ms.Write(new byte[] { 1, 2, 3, 4, 5, 6 });
+            ms.Seek(0L, SeekOrigin.Begin);
+
+            List<MemoryStream> result = new();
+
+            Stream createDestinationStream(uint id)
+            {
+                result[(int)id] = new MemoryStream();
+                return result[(int)id];
+            }
+
+            (uint numberOfBlocksToInterleave, uint numberOfBytes, uint blockSize) = (2, 2, 3);
+
+            Func<IEnumerable<uint>, Task> commitDestination = async ids => { await Task.Delay(0); };
+
+            await InterleaveBlob(
+                sourceStream: ms, sourceStreamLength: ms.Length,
+                createDestinationStream: createDestinationStream,
+                numberOfBlocksToInterleave: numberOfBlocksToInterleave, numberOfBytes: numberOfBytes, blockSize: blockSize,
+                commitDestination: commitDestination.Invoke);
+        }
+
+        static async Task InterleaveBlob(
+            Stream sourceStream, long sourceStreamLength,
+            Func<uint, Stream> createDestinationStream,
+            uint numberOfBlocksToInterleave, uint numberOfBytes, uint blockSize,
+            Func<IEnumerable<uint>, Task> commitDestination,
+            CancellationToken ct = default)
+        {
+
+            Func<byte[], int, int, IObservable<int>> read = Observable.FromAsyncPattern<byte[], int, int, int>(
+                    begin: sourceStream.BeginRead,
+                    end: sourceStream.EndRead);
+            var buffer = new byte[10];
+            var bytesReadStream = read(buffer, 0, buffer.Length);
+            bytesReadStream.Subscribe(
+                byteCount =>
+                {
+                    Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.",byteCount);
+                });
+
+            IObservable<byte[]> x = Observable.Using(
+                () => sourceStream,
+                stream => Observable.Generate(
+                    stream,
+                    s => true,
+                    s => s,
+                    s => {
+                        byte[] buf = new byte[1];
+                        int v = s.Read(buf, 0, buf.Length);
+                        return buf;
+                    }));
+            x.Subscribe(onNext: b =>
+            {
+                ;
+            },
+            onCompleted => {
+                ;
+            });
+
+
+            await Task.Delay(0);
+        }
+
+        static async Task BenchNumbers()
+        {
+            foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
             {
                 await Bench(i);
             }
         }
 
-        static async Task Bench(int parallelDownloads)
+       static async Task Bench(int parallelDownloads)
         {
             var (accountName, containerName, blobName) = ("chgeuerperf", "container1", "1gb.randombin");
-
 
             const long giga = (1 << 30);
             static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;
@@ -63,7 +150,7 @@
             var blockListResponse = await blobClient.GetBlockListAsync();
             var gigs = (int)(blockListResponse.Value.BlobContentLength / giga);
             await Console.Out.WriteLineAsync($"Length {blockListResponse.Value.BlobContentLength} bytes, approx {gigs} GB");
-
+            
             foreach (var blocks in blockListResponse.Value.CommittedBlocks.GetBlocks().Chunk(batchSize: parallelDownloads))
             {
                 Stopwatch stopWatch = new();
@@ -108,6 +195,7 @@
 
     internal static class Utilities 
     {
+
         private static IEnumerable<U> RollingAggregate<T, U, V>(
             this IEnumerable<T> ts, 
             V start, 
@@ -122,18 +210,18 @@
             }
         }
 
-        internal static IEnumerable<(BlobBlock, Azure.HttpRange)> GetBlocks(this IEnumerable<BlobBlock> collection)
+        internal static IEnumerable<(BlobBlock, HttpRange)> GetBlocks(this IEnumerable<BlobBlock> collection)
             => collection.RollingAggregate(
                 start: 0L, 
                 aggregate: (bb,offset) => offset + bb.SizeLong, 
-                map: (bb, offset) => (bb, new Azure.HttpRange(offset: offset, length: bb.SizeLong)));
+                map: (bb, offset) => (bb, new HttpRange(offset: offset, length: bb.SizeLong)));
 
-        internal static IEnumerable<(BlobBlock, Azure.HttpRange)> Blocks(this IEnumerable<BlobBlock> collection)
+        internal static IEnumerable<(BlobBlock, HttpRange)> Blocks(this IEnumerable<BlobBlock> collection)
         {
             long offset = 0L;
             foreach (var blockblob in collection)
             {
-                yield return (blockblob, new Azure.HttpRange(offset: offset, length: blockblob.SizeLong));
+                yield return (blockblob, new HttpRange(offset: offset, length: blockblob.SizeLong));
                 offset += blockblob.SizeLong;
             }
         }
