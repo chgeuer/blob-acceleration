@@ -27,13 +27,13 @@ namespace ParallelDownload
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
             request.Headers.Add("Metadata", "true");
-            
+
             var response = await new HttpClient().SendAsync(request);
             // var responseStr = await response.Content.ReadAsStringAsync();
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            var s = await JsonSerializer.DeserializeAsync<dynamic>(responseStream); 
-            
-            await Console.Out.WriteLineAsync(s.compute.location);
+            var s = await JsonSerializer.DeserializeAsync<dynamic>(responseStream);
+
+            await Console.Out.WriteLineAsync(s["compute"]["location"]);
 
             // await DemoInterleaving();
             await BenchNumbers();
