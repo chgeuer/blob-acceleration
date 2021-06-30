@@ -9,11 +9,8 @@ namespace ParallelDownload
     using System.IO;
     using System.Linq;
     using System.Net.Http;
-    using System.Reactive.Concurrency;
-    using System.Reactive.Disposables;
     using System.Reactive.Linq;
 
-    using System.Threading;
     using System.Threading.Tasks;
 
     using Azure;
@@ -27,78 +24,57 @@ namespace ParallelDownload
     {
         static async Task Main(string[] _args)
         {
-
-
             await BenchNumbers();
             // await DemoInterleaving();
         }
 
-        static async Task DemoInterleaving()
-        {
-            MemoryStream ms = new();
-            ms.Write(new byte[] { 1, 2, 3, 4, 5, 6 });
-            ms.Seek(0L, SeekOrigin.Begin);
+        //static async Task DemoInterleaving()
+        //{
+        //    MemoryStream ms = new();
+        //    ms.Write(new byte[] { 1, 2, 3, 4, 5, 6, 1 });
+        //    ms.Seek(0L, SeekOrigin.Begin);
 
-            List<MemoryStream> result = new();
+        //    List<MemoryStream> result = new();
 
-            Stream createDestinationStream(uint id)
-            {
-                result[(int)id] = new MemoryStream();
-                return result[(int)id];
-            }
+        //    Stream createDestinationStream(uint id)
+        //    {
+        //        result[(int)id] = new MemoryStream();
+        //        return result[(int)id];
+        //    }
 
-            (uint numberOfBlocksToInterleave, uint numberOfBytes, uint blockSize) = (2, 2, 3);
+        //    Func<IEnumerable<uint>, Task> commitDestination = async ids => { await Task.Delay(0); };
 
-            Func<IEnumerable<uint>, Task> commitDestination = async ids => { await Task.Delay(0); };
+        //    await InterleaveBlob(
+        //        sourceStream: ms, sourceStreamLength: ms.Length,
+        //        createDestinationStream: createDestinationStream,
+        //        numberOfBlocksToInterleave: 2,
+        //        numberOfBytes: 2,
+        //        blockSize: 3,
+        //        commitDestination: commitDestination.Invoke);
+        //}
 
-            await InterleaveBlob(
-                sourceStream: ms, sourceStreamLength: ms.Length,
-                createDestinationStream: createDestinationStream,
-                numberOfBlocksToInterleave: numberOfBlocksToInterleave, numberOfBytes: numberOfBytes, blockSize: blockSize,
-                commitDestination: commitDestination.Invoke);
-        }
-
-        static async Task InterleaveBlob(
-            Stream sourceStream, long sourceStreamLength,
-            Func<uint, Stream> createDestinationStream,
-            uint numberOfBlocksToInterleave, uint numberOfBytes, uint blockSize,
-            Func<IEnumerable<uint>, Task> commitDestination,
-            CancellationToken ct = default)
-        {
-
-            Func<byte[], int, int, IObservable<int>> read = Observable.FromAsyncPattern<byte[], int, int, int>(
-                    begin: sourceStream.BeginRead,
-                    end: sourceStream.EndRead);
-            var buffer = new byte[10];
-            var bytesReadStream = read(buffer, 0, buffer.Length);
-            bytesReadStream.Subscribe(
-                byteCount =>
-                {
-                    Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.", byteCount);
-                });
-
-            IObservable<byte[]> x = Observable.Using(
-                () => sourceStream,
-                stream => Observable.Generate(
-                    stream,
-                    s => true,
-                    s => s,
-                    s => {
-                        byte[] buf = new byte[1];
-                        int v = s.Read(buf, 0, buf.Length);
-                        return buf;
-                    }));
-            x.Subscribe(onNext: b =>
-            {
-                ;
-            },
-            onCompleted => {
-                ;
-            });
-
-
-            await Task.Delay(0);
-        }
+        //static async Task InterleaveBlob(
+        //    Stream sourceStream, long sourceStreamLength,
+        //    Func<uint, Stream> createDestinationStream,
+        //    uint numberOfBlocksToInterleave, uint numberOfBytes, uint blockSize,
+        //    Func<IEnumerable<uint>, Task> commitDestination,
+        //    CancellationToken ct = default)
+        //{
+        //    var o = sourceStream.ToObservable(blockSize);
+        //    o.Subscribe(
+        //        onNext: mem => Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.", mem.Length),
+        //        onError: ex => Console.Error.WriteLine(ex.Message),
+        //        onCompleted: () => Console.WriteLine("Done"),
+        //        token: ct
+        //    );
+        //    o.Subscribe(
+        //        onNext: mem => Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.", mem.Length),
+        //        onError: ex => Console.Error.WriteLine(ex.Message),
+        //        onCompleted: () => Console.WriteLine("Done"),
+        //        token: ct
+        //    );
+        //    await Task.Delay(10000);
+        //}
 
         static async Task<dynamic> GetIMDS()
         {
@@ -113,7 +89,7 @@ namespace ParallelDownload
         static async Task BenchNumbers()
         {
             dynamic s = await GetIMDS();
-            await Console.Out.WriteLineAsync($"--------------------------------------------------------------");
+            Console.Out.WriteLine($"--------------------------------------------------------------");
             await Console.Out.WriteLineAsync($".compute.vmSize     = {s.compute.vmSize}");
             await Console.Out.WriteLineAsync($".compute.location   = {s.compute.location}");
             await Console.Out.WriteLineAsync($".compute.zone       = {s.compute.zone}");
@@ -129,12 +105,21 @@ namespace ParallelDownload
 
         static async Task Bench(int parallelDownloads, string location)
         {
+            // based on the data center region, use a different storage account.
             var accountName = location switch
             {
                 "westeurope" => "chgeuerperf",
                 "northeurope" => "chgeuerperfne",
                 _ => throw new NotSupportedException("Unsupported location"),
             };
+
+
+            // storageAccountName="chgeuerperfne"
+            // containerName = "container1"
+            // blobName="1gb.randombin"
+            //
+            // dd if=/dev/zero bs=1G count=128 | azcopy copy "https://${storageAccountName}.blob.core.windows.net/${containerName}/${blobName}" --block-size-mb 1024 --from-to PipeBlob 
+            // 
             var (containerName, blobName) = ("container1", "1gb.randombin");
 
             const long giga = (1 << 30);
@@ -143,28 +128,6 @@ namespace ParallelDownload
             var blobClient = new BlockBlobClient(
                 blobUri: new Uri($"https://{accountName}.blob.core.windows.net/{containerName}/{blobName}"),
                 credential: new DefaultAzureCredential(includeInteractiveCredentials: true));
-
-            //var props = await blobClient.GetPropertiesAsync();
-            //var gigs = (int) (props.Value.ContentLength / giga);
-            //await Console.Out.WriteLineAsync($"Length {props.Value.ContentLength} bytes, approx {gigs} GB");
-            //var tasks = Enumerable
-            //    .Range(start: 0, count: gigs)
-            //    .Select(i => (long)i)
-            //    .Select<long, Azure.HttpRange>(i => new(offset: i * giga, length: giga)) // https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-the-range-header-for-blob-service-operations
-            //    .Select(async range =>
-            //    {
-            //        try {
-            //            await Console.Out.WriteLineAsync($"Downloading {range}");
-            //            var response = await blobClient.DownloadStreamingAsync(range);
-            //            var stream = response.Value.Content;
-            //            await stream.CopyToAsync(System.IO.Stream.Null);
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            await Console.Error.WriteLineAsync($"Exception {e.Message} {range}");
-            //        }
-            //    })
-            //    .ToArray();
 
             await Console.Out.WriteLineAsync($"Running {parallelDownloads} downloads in parallel");
 
@@ -183,18 +146,12 @@ namespace ParallelDownload
                 var tasks = blocks
                     .Select(async (blockAndRange, _i) =>
                     {
-                        (BlobBlock blobBlock, Azure.HttpRange range) = blockAndRange;
+                        (BlobBlock blobBlock, HttpRange range) = blockAndRange;
 
-                        //Stopwatch innerStopWatch = new();
-                        //innerStopWatch.Start();
-
-                        var response = await blobClient.DownloadStreamingAsync(blockAndRange.Item2);
+                        // https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-the-range-header-for-blob-service-operations
+                        var response = await blobClient.DownloadStreamingAsync(range);
                         var stream = response.Value.Content;
-                        await stream.CopyToAsync(System.IO.Stream.Null); // We're not really processing the data upon arrival. Just memcopy into the void...
-
-                        //innerStopWatch.Stop();
-                        //var ts = innerStopWatch.Elapsed;
-                        // await Console.Out.WriteLineAsync($"Downloaded {range} {blobBlock.SizeLong} bytes ({MegabitPerSecond(blobBlock.SizeLong, ts):F2} Mbit/sec)");
+                        await stream.CopyToAsync(Stream.Null); // We're not really processing the data upon arrival. Just memcopy into the void...
 
                         return blobBlock.SizeLong;
                     })
@@ -219,6 +176,26 @@ namespace ParallelDownload
 
     internal static class Utilities
     {
+        //internal static IObservable<Memory<byte>> ToObservable(this Stream stream, uint length)
+        //{
+        //    return Observable.Create<Memory<byte>>((observer, cancellationToken) => 
+        //    {
+        //        return Task.Run(async () =>
+        //        {
+        //            int count = 0;
+        //            do
+        //            {
+        //                byte[] buffer = new byte[length];
+        //                count = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
+        //                if (count > 0)
+        //                {
+        //                    observer.OnNext(new Memory<byte>(buffer, 0, count));
+        //                }
+        //            } while (count > 0);
+        //            observer.OnCompleted();
+        //        }, cancellationToken);
+        //    });
+        //}
 
         private static IEnumerable<U> RollingAggregate<T, U, V>(
             this IEnumerable<T> ts,
