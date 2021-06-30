@@ -5,12 +5,9 @@ namespace ParallelDownload
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-
     using System.IO;
     using System.Linq;
     using System.Net.Http;
-    using System.Reactive.Linq;
-
     using System.Threading.Tasks;
 
     using Azure;
@@ -24,79 +21,13 @@ namespace ParallelDownload
     {
         static async Task Main(string[] _args)
         {
+           
             await BenchNumbers();
-            // await DemoInterleaving();
-        }
-
-        //static async Task DemoInterleaving()
-        //{
-        //    MemoryStream ms = new();
-        //    ms.Write(new byte[] { 1, 2, 3, 4, 5, 6, 1 });
-        //    ms.Seek(0L, SeekOrigin.Begin);
-
-        //    List<MemoryStream> result = new();
-
-        //    Stream createDestinationStream(uint id)
-        //    {
-        //        result[(int)id] = new MemoryStream();
-        //        return result[(int)id];
-        //    }
-
-        //    Func<IEnumerable<uint>, Task> commitDestination = async ids => { await Task.Delay(0); };
-
-        //    await InterleaveBlob(
-        //        sourceStream: ms, sourceStreamLength: ms.Length,
-        //        createDestinationStream: createDestinationStream,
-        //        numberOfBlocksToInterleave: 2,
-        //        numberOfBytes: 2,
-        //        blockSize: 3,
-        //        commitDestination: commitDestination.Invoke);
-        //}
-
-        //static async Task InterleaveBlob(
-        //    Stream sourceStream, long sourceStreamLength,
-        //    Func<uint, Stream> createDestinationStream,
-        //    uint numberOfBlocksToInterleave, uint numberOfBytes, uint blockSize,
-        //    Func<IEnumerable<uint>, Task> commitDestination,
-        //    CancellationToken ct = default)
-        //{
-        //    var o = sourceStream.ToObservable(blockSize);
-        //    o.Subscribe(
-        //        onNext: mem => Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.", mem.Length),
-        //        onError: ex => Console.Error.WriteLine(ex.Message),
-        //        onCompleted: () => Console.WriteLine("Done"),
-        //        token: ct
-        //    );
-        //    o.Subscribe(
-        //        onNext: mem => Console.WriteLine("Number of bytes read={0}, buffer should be populated with data now.", mem.Length),
-        //        onError: ex => Console.Error.WriteLine(ex.Message),
-        //        onCompleted: () => Console.WriteLine("Done"),
-        //        token: ct
-        //    );
-        //    await Task.Delay(10000);
-        //}
-
-        static async Task<dynamic> GetIMDS()
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get,
-                requestUri: "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
-            request.Headers.Add("Metadata", "true");
-            var response = await new HttpClient().SendAsync(request);
-            var responseString = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<dynamic>(responseString);
         }
 
         static async Task BenchNumbers()
         {
-            dynamic s = await GetIMDS();
-            Console.Out.WriteLine($"--------------------------------------------------------------");
-            await Console.Out.WriteLineAsync($".compute.vmSize     = {s.compute.vmSize}");
-            await Console.Out.WriteLineAsync($".compute.location   = {s.compute.location}");
-            await Console.Out.WriteLineAsync($".compute.zone       = {s.compute.zone}");
-            await Console.Out.WriteLineAsync($".compute.resourceId = {s.compute.resourceId}");
-            await Console.Out.WriteLineAsync($"--------------------------------------------------------------");
-
-            var location = (string)s.compute.location;
+            string location = await PrintMetadataAndReturnLocation();
             foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
             {
                 await Bench(i, location);
@@ -112,7 +43,6 @@ namespace ParallelDownload
                 "northeurope" => "chgeuerperfne",
                 _ => throw new NotSupportedException("Unsupported location"),
             };
-
 
             // storageAccountName="chgeuerperfne"
             // containerName = "container1"
@@ -172,31 +102,32 @@ namespace ParallelDownload
 
             await Console.Out.WriteLineAsync($"-----------------------------------");
         }
+
+        static async Task<string> PrintMetadataAndReturnLocation()
+        {
+            static async Task<dynamic> GetIMDS()
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get,
+                    requestUri: "http://169.254.169.254/metadata/instance?api-version=2021-02-01");
+                request.Headers.Add("Metadata", "true");
+                var response = await new HttpClient().SendAsync(request);
+                var responseString = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<dynamic>(responseString);
+            }
+
+            dynamic s = await GetIMDS();
+            Console.Out.WriteLine($"--------------------------------------------------------------");
+            await Console.Out.WriteLineAsync($".compute.vmSize     = {s.compute.vmSize}");
+            await Console.Out.WriteLineAsync($".compute.location   = {s.compute.location}");
+            await Console.Out.WriteLineAsync($".compute.zone       = {s.compute.zone}");
+            await Console.Out.WriteLineAsync($".compute.resourceId = {s.compute.resourceId}");
+            await Console.Out.WriteLineAsync($"--------------------------------------------------------------");
+            return s.compute.location;
+        }
     }
 
     internal static class Utilities
     {
-        //internal static IObservable<Memory<byte>> ToObservable(this Stream stream, uint length)
-        //{
-        //    return Observable.Create<Memory<byte>>((observer, cancellationToken) => 
-        //    {
-        //        return Task.Run(async () =>
-        //        {
-        //            int count = 0;
-        //            do
-        //            {
-        //                byte[] buffer = new byte[length];
-        //                count = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
-        //                if (count > 0)
-        //                {
-        //                    observer.OnNext(new Memory<byte>(buffer, 0, count));
-        //                }
-        //            } while (count > 0);
-        //            observer.OnCompleted();
-        //        }, cancellationToken);
-        //    });
-        //}
-
         private static IEnumerable<U> RollingAggregate<T, U, V>(
             this IEnumerable<T> ts,
             V start,
