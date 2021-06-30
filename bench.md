@@ -85,3 +85,8 @@ az storage blob list  --auth-mode login --account-name "${storageAccountName}" -
 https://www.binarytides.com/linux-commands-monitor-network/
 iptraf
 nload
+
+```
+
+dotnet run > "$(./imds.sh | jq -r .compute.vmSize).log"
+
