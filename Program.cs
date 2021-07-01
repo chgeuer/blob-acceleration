@@ -17,46 +17,76 @@ namespace ParallelDownload
     using Azure.Storage.Blobs.Specialized;
     using Newtonsoft.Json;
 
+    public record BlockInformation(int BlockNumber, BlobBlock BlobBlock, HttpRange Range);
+    public record BlobInformation(string AccountName, string ContainerName, string BlobName);
+
     class Program
     {
         static async Task Main(string[] _args)
         {
-           
             await BenchNumbers();
         }
 
-        static async Task BenchNumbers()
-        {
-            string location = await PrintMetadataAndReturnLocation();
-            foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
-            {
-                await Bench(i, location);
-            }
-        }
-
-        static async Task Bench(int parallelDownloads, string location)
+        static async Task<BlobInformation> Config()
         {
             // based on the data center region, use a different storage account.
+            string location = await PrintMetadataAndReturnLocation();
             var accountName = location switch
             {
                 "westeurope" => "chgeuerperf",
                 "northeurope" => "chgeuerperfne",
                 _ => throw new NotSupportedException("Unsupported location"),
+
             };
 
-            // storageAccountName="chgeuerperfne"
-            // containerName = "container1"
-            // blobName="1gb.randombin"
-            //
             // dd if=/dev/zero bs=1G count=128 | azcopy copy "https://${storageAccountName}.blob.core.windows.net/${containerName}/${blobName}" --block-size-mb 1024 --from-to PipeBlob 
-            // 
-            var (containerName, blobName) = ("container1", "1gb.randombin");
 
+            return new (accountName, "container1", "1gb.randombin");
+        }
+
+        static async Task BenchNumbers()
+        {
+            var blob = await Config();
+
+            await BenchPlainDownload(blob);
+
+            foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
+            {
+                await Bench(i, blob);
+            }
+        }
+
+        // Just download without any consideration of block boundaries, parallelization, etc.
+        static async Task BenchPlainDownload(BlobInformation blob) 
+        {
+            var blobClient = new BlockBlobClient(
+                blobUri: new Uri($"https://{blob.AccountName}.blob.core.windows.net/{blob.ContainerName}/{blob.BlobName}"),
+                credential: new DefaultAzureCredential(includeInteractiveCredentials: true));
+            Stopwatch outerStopWatch = new();
+            outerStopWatch.Start();
+
+            var response = await blobClient.DownloadStreamingAsync();
+            Stream stream = response.Value.Content;
+            await stream.CopyToAsync(Stream.Null); // We're not really processing the data upon arrival. Just memcopy into the void...
+
+            outerStopWatch.Stop();
+            var outerTime = outerStopWatch.Elapsed;
+
+            long lenght = (await blobClient.GetPropertiesAsync()).Value.ContentLength;
+
+            await Console.Out.WriteLineAsync("----------------------------------------------------");
+            await Console.Out.WriteLineAsync($"Regular end-to-end download {outerTime.TotalSeconds} seconds ({MegabitPerSecond(lenght, outerStopWatch.Elapsed):F2} Mbit/sec)");
+            await Console.Out.WriteLineAsync("----------------------------------------------------");
+        }
+
+        static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;
+
+        static async Task Bench(int parallelDownloads, BlobInformation blob)
+        {
             const long giga = (1 << 30);
-            static double MegabitPerSecond(long bytes, TimeSpan ts) => (8.0 / (1024 * 1024)) * bytes / ts.TotalSeconds;
 
             var blobClient = new BlockBlobClient(
-                blobUri: new Uri($"https://{accountName}.blob.core.windows.net/{containerName}/{blobName}"),
+                blobUri: new Uri($"https://{blob.AccountName}.blob.core.windows.net/{blob.ContainerName}/{blob.BlobName}"),
                 credential: new DefaultAzureCredential(includeInteractiveCredentials: true));
 
             await Console.Out.WriteLineAsync($"Running {parallelDownloads} downloads in parallel");
@@ -64,36 +94,35 @@ namespace ParallelDownload
             Stopwatch outerStopWatch = new();
             outerStopWatch.Start();
 
-            var blockListResponse = await blobClient.GetBlockListAsync();
-            var gigs = (int)(blockListResponse.Value.BlobContentLength / giga);
+            Response<BlockList> blockListResponse = await blobClient.GetBlockListAsync();
+            int gigs = (int)(blockListResponse.Value.BlobContentLength / giga);
             await Console.Out.WriteLineAsync($"Length {blockListResponse.Value.BlobContentLength} bytes, approx {gigs} GB");
 
-            foreach (var blocks in blockListResponse.Value.CommittedBlocks.GetBlocks().Chunk(batchSize: parallelDownloads))
-            {
-                Stopwatch stopWatch = new();
-                stopWatch.Start();
+            IEnumerable<BlockInformation> listOfBlockLists = blockListResponse.Value.CommittedBlocks.Blocks().ToArray();
 
-                var tasks = blocks
-                    .Select(async (blockAndRange, _i) =>
+            Task<long>[] tasks = Enumerable
+                .Range(start: 0, count: parallelDownloads)
+                .Select(offset => listOfBlockLists.Where((blockId, i) => i % parallelDownloads == offset))
+                .Select(async blocks => {
+                    long downloaded = 0L;
+                    foreach (var block in blocks) 
                     {
-                        (BlobBlock blobBlock, HttpRange range) = blockAndRange;
+                        Stopwatch innerStopWatch = new();
+                        innerStopWatch.Start();
 
-                        // https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-the-range-header-for-blob-service-operations
-                        var response = await blobClient.DownloadStreamingAsync(range);
-                        var stream = response.Value.Content;
+                        var response = await blobClient.DownloadStreamingAsync(block.Range);
+                        Stream stream = response.Value.Content;
                         await stream.CopyToAsync(Stream.Null); // We're not really processing the data upon arrival. Just memcopy into the void...
+                        downloaded += block.BlobBlock.SizeLong;
 
-                        return blobBlock.SizeLong;
-                    })
-                    .ToArray();
+                        innerStopWatch.Stop();
+                        await Console.Out.WriteLineAsync($"Block {block.BlockNumber} took {innerStopWatch.Elapsed.TotalSeconds} seconds ({MegabitPerSecond(block.BlobBlock.SizeLong, innerStopWatch.Elapsed):F2} Mbit/sec)");
+                    }
+                    return downloaded;
+                }).ToArray();
 
-                var downloads = await Task.WhenAll(tasks);
 
-                stopWatch.Stop();
-                var ts = stopWatch.Elapsed;
-
-                await Console.Out.WriteLineAsync($"In {parallelDownloads} downloads, fetch {downloads.Sum()} bytes ({MegabitPerSecond(downloads.Sum(), ts):F2} Mbit/sec)");
-            }
+            long[] downloads = await Task.WhenAll(tasks);
 
             outerStopWatch.Stop();
             var outerTime = outerStopWatch.Elapsed;
@@ -128,33 +157,35 @@ namespace ParallelDownload
 
     internal static class Utilities
     {
-        private static IEnumerable<U> RollingAggregate<T, U, V>(
-            this IEnumerable<T> ts,
-            V start,
-            Func<T, V, V> aggregate,
-            Func<T, V, U> map)
-        {
-            V agg = start;
-            foreach (T t in ts)
-            {
-                yield return map(t, agg);
-                agg = aggregate(t, agg);
-            }
-        }
+        //private static IEnumerable<U> RollingAggregate<T, U, V>(
+        //    this IEnumerable<T> ts,
+        //    V start,
+        //    Func<T, V, V> aggregate,
+        //    Func<T, V, U> map)
+        //{
+        //    V agg = start;
+        //    foreach (T t in ts)
+        //    {
+        //        yield return map(t, agg);
+        //        agg = aggregate(t, agg);
+        //    }
+        //}
 
-        internal static IEnumerable<(BlobBlock, HttpRange)> GetBlocks(this IEnumerable<BlobBlock> collection)
-            => collection.RollingAggregate(
-                start: 0L,
-                aggregate: (bb, offset) => offset + bb.SizeLong,
-                map: (bb, offset) => (bb, new HttpRange(offset: offset, length: bb.SizeLong)));
+        //internal static IEnumerable<(BlobBlock, HttpRange)> GetBlocks(this IEnumerable<BlobBlock> collection)
+        //    => collection.RollingAggregate(
+        //        start: 0L,
+        //        aggregate: (bb, offset) => offset + bb.SizeLong,
+        //        map: (bb, offset) => (bb, new HttpRange(offset: offset, length: bb.SizeLong)));
 
-        internal static IEnumerable<(BlobBlock, HttpRange)> Blocks(this IEnumerable<BlobBlock> collection)
+        internal static IEnumerable<BlockInformation> Blocks(this IEnumerable<BlobBlock> blocks)
         {
             long offset = 0L;
-            foreach (var blockblob in collection)
+            int i = 0;
+            foreach (var block in blocks)
             {
-                yield return (blockblob, new HttpRange(offset: offset, length: blockblob.SizeLong));
-                offset += blockblob.SizeLong;
+                yield return new (i, block, new HttpRange(offset: offset, length: block.SizeLong));
+                offset += block.SizeLong;
+                i += 1;
             }
         }
 
