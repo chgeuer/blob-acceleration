@@ -140,7 +140,8 @@ namespace ParallelDownload
                     $"Block {d.BlockNumber}",
                     $"TaskID {d.TaskID}",
                     $"Start {(d.Timing.Start.Ticks - start) / TimeSpan.TicksPerSecond}",
-                    $"Duration {(d.Timing.Start.Ticks - start + d.Timing.Duration.Ticks) / TimeSpan.TicksPerSecond}",
+                    $"End {(d.Timing.Start.Ticks - start + d.Timing.Duration.Ticks) / TimeSpan.TicksPerSecond}",
+                    $"Duration {(d.Timing.Duration.Ticks) / TimeSpan.TicksPerSecond}",
                     $"{d.Range.Length} bytes",
                 }));
             }
