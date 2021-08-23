@@ -50,12 +50,12 @@ namespace ParallelDownload
         {
             var blob = await Config();
 
-            await BenchPlainDownload(blob);
-
-            foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 })
+            foreach (var i in new[] { 1, 2, 3, 4, 5, 8, 12, 16, 20, 25, 30, 40, 50 }.Reverse())
             {
                 await Bench(i, blob);
             }
+
+            await BenchPlainDownload(blob);
         }
 
         // Just download without any consideration of block boundaries, parallelization, etc.
