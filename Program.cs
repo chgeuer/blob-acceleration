@@ -19,6 +19,8 @@ namespace ParallelDownload
 
     public record BlockInformation(int BlockNumber, BlobBlock BlobBlock, HttpRange Range);
     public record BlobInformation(string AccountName, string ContainerName, string BlobName);
+    public record Timing(DateTime Start, TimeSpan Duration);
+    public record DownloadInformation(int BlockNumber, HttpRange Range, Timing Timing);
 
     class Program
     {
@@ -84,6 +86,7 @@ namespace ParallelDownload
         static async Task Bench(int parallelDownloads, BlobInformation blob)
         {
             const long giga = (1 << 30);
+            var start = DateTime.UtcNow.Ticks;
 
             var blobClient = new BlockBlobClient(
                 blobUri: new Uri($"https://{blob.AccountName}.blob.core.windows.net/{blob.ContainerName}/{blob.BlobName}"),
@@ -100,32 +103,49 @@ namespace ParallelDownload
 
             IEnumerable<BlockInformation> listOfBlockLists = blockListResponse.Value.CommittedBlocks.Blocks().ToArray();
 
-            Task<long>[] tasks = Enumerable
+            Task<List<DownloadInformation>>[] tasks = Enumerable
                 .Range(start: 0, count: parallelDownloads)
                 .Select(offset => listOfBlockLists.Where((blockId, i) => i % parallelDownloads == offset))
                 .Select(async blocks => {
-                    long downloaded = 0L;
+                    List<DownloadInformation> downloaded = new();
                     foreach (var block in blocks) 
                     {
+                        DateTime start = DateTime.UtcNow;
                         Stopwatch innerStopWatch = new();
                         innerStopWatch.Start();
 
                         var response = await blobClient.DownloadStreamingAsync(block.Range);
                         Stream stream = response.Value.Content;
                         await stream.CopyToAsync(Stream.Null); // We're not really processing the data upon arrival. Just memcopy into the void...
-                        downloaded += block.BlobBlock.SizeLong;
 
                         innerStopWatch.Stop();
-                        await Console.Out.WriteLineAsync($"Block {block.BlockNumber} took {innerStopWatch.Elapsed.TotalSeconds} seconds ({MegabitPerSecond(block.BlobBlock.SizeLong, innerStopWatch.Elapsed):F2} Mbit/sec)");
+                        downloaded.Add(new DownloadInformation(block.BlockNumber, block.Range, new(start, innerStopWatch.Elapsed)));
+                        // await Console.Out.WriteLineAsync($"Block {block.BlockNumber} took {innerStopWatch.Elapsed.TotalSeconds} seconds ({MegabitPerSecond(block.BlobBlock.SizeLong, innerStopWatch.Elapsed):F2} Mbit/sec)");
                     }
                     return downloaded;
                 }).ToArray();
 
 
-            long[] downloads = await Task.WhenAll(tasks);
+            DownloadInformation[] downloads = 
+                (await Task.WhenAll(tasks))
+                    .SelectMany(x => x)
+                    .OrderBy(x => x.BlockNumber)
+                    .ToArray();
 
             outerStopWatch.Stop();
             var outerTime = outerStopWatch.Elapsed;
+
+            foreach (var d in downloads)
+            {
+                await Console.Out.WriteLineAsync(string.Join("\t", new[] {
+                    $"Block {d.BlockNumber}",
+                    $"{d.Range.Length} bytes",
+                    $"{(d.Timing.Start.Ticks - start)/1000}",
+                    $"{(d.Timing.Start.Ticks - start + d.Timing.Duration.Ticks)/1000}",
+                    $"{d.Timing.Start}",
+                    $"{d.Timing.Start + d.Timing.Duration}",
+                }));
+            }
 
             await Console.Out.WriteLineAsync($"Overall time with {parallelDownloads} {outerTime.TotalSeconds} seconds ({MegabitPerSecond(blockListResponse.Value.BlobContentLength, outerTime):F2} Mbit/sec)");
 
