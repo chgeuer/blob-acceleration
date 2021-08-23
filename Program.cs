@@ -20,7 +20,7 @@ namespace ParallelDownload
     public record BlockInformation(int BlockNumber, BlobBlock BlobBlock, HttpRange Range);
     public record BlobInformation(string AccountName, string ContainerName, string BlobName);
     public record Timing(DateTime Start, TimeSpan Duration);
-    public record DownloadInformation(int BlockNumber, HttpRange Range, Timing Timing);
+    public record DownloadInformation(int BlockNumber, int TaskID, HttpRange Range, Timing Timing);
 
     class Program
     {
@@ -105,10 +105,10 @@ namespace ParallelDownload
 
             Task<List<DownloadInformation>>[] tasks = Enumerable
                 .Range(start: 0, count: parallelDownloads)
-                .Select(offset => listOfBlockLists.Where((blockId, i) => i % parallelDownloads == offset))
-                .Select(async blocks => {
+                .Select(taskId => new { TaskId = taskId, Blocks = listOfBlockLists.Where((_, blockId) => blockId % parallelDownloads == taskId) })
+                .Select(async x => {
                     List<DownloadInformation> downloaded = new();
-                    foreach (var block in blocks) 
+                    foreach (var block in x.Blocks) 
                     {
                         DateTime start = DateTime.UtcNow;
                         Stopwatch innerStopWatch = new();
@@ -119,12 +119,11 @@ namespace ParallelDownload
                         await stream.CopyToAsync(Stream.Null); // We're not really processing the data upon arrival. Just memcopy into the void...
 
                         innerStopWatch.Stop();
-                        downloaded.Add(new DownloadInformation(block.BlockNumber, block.Range, new(start, innerStopWatch.Elapsed)));
+                        downloaded.Add(new DownloadInformation(block.BlockNumber, x.TaskId, block.Range, new(start, innerStopWatch.Elapsed)));
                         // await Console.Out.WriteLineAsync($"Block {block.BlockNumber} took {innerStopWatch.Elapsed.TotalSeconds} seconds ({MegabitPerSecond(block.BlobBlock.SizeLong, innerStopWatch.Elapsed):F2} Mbit/sec)");
                     }
                     return downloaded;
                 }).ToArray();
-
 
             DownloadInformation[] downloads = 
                 (await Task.WhenAll(tasks))
@@ -134,16 +133,15 @@ namespace ParallelDownload
 
             outerStopWatch.Stop();
             var outerTime = outerStopWatch.Elapsed;
-
+            
             foreach (var d in downloads)
             {
                 await Console.Out.WriteLineAsync(string.Join("\t", new[] {
                     $"Block {d.BlockNumber}",
+                    $"TaskID {d.TaskID}",
+                    $"Start {(d.Timing.Start.Ticks - start) / TimeSpan.TicksPerSecond}",
+                    $"Duration {(d.Timing.Start.Ticks - start + d.Timing.Duration.Ticks) / TimeSpan.TicksPerSecond}",
                     $"{d.Range.Length} bytes",
-                    $"{(d.Timing.Start.Ticks - start)/1000}",
-                    $"{(d.Timing.Start.Ticks - start + d.Timing.Duration.Ticks)/1000}",
-                    $"{d.Timing.Start}",
-                    $"{d.Timing.Start + d.Timing.Duration}",
                 }));
             }
 
